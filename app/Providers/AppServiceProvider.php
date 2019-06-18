@@ -3,6 +3,7 @@
 namespace ChatShopping\Providers;
 
 use ChatShopping\Models\ProductInput;
+use ChatShopping\Models\ProductOutput;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -15,12 +16,22 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         \Schema::defaultStringLength(191);
+
         ProductInput::created(function (ProductInput $input){
             $product = $input->product;
             $product->stock += $input->amount;
             $product->save();
 
             //Estudar sobre Observers e Events Eloquent pela doc do laravel
+        });
+
+        ProductOutput::created(function (ProductOutput $output){
+            $product = $output->product;
+            $product->stock -= $output->amount;
+            if ($product->stock < 0) {
+                throw new \Exception("Estoque de {$product->name} não pode ser negativo!");
+            }
+            $product->save();
         });
     }
 
