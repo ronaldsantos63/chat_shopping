@@ -10,16 +10,20 @@ use ChatShopping\Models\ProductInput;
 
 class ProductInputController extends Controller
 {
-    public function index(Product $product)
+    public function index()
     {
-        return new ProductInputResource($product);
+        // Usar o with para evitar multiplas consultas no banco de dados, (consultas nos relacionamentos)
+        $inputs = ProductInput::with('product')->paginate();
+        return ProductInputResource::collection($inputs);
     }
 
-    public function store(ProductInputRequest $request, Product $product)
+    public function store(ProductInputRequest $request)
     {
-        $product->inputs()->create($request->all());
-        $product->stock += $request->all()['amount'];
-        $product->save();
-        return new ProductInputResource($product);
+        $input = ProductInput::create($request->all());
+        return new ProductInputResource($input);
+    }
+
+    public function show(ProductInput $input){
+        return new ProductInputResource($input);
     }
 }

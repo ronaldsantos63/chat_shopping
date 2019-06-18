@@ -2,6 +2,7 @@
 
 namespace ChatShopping\Providers;
 
+use ChatShopping\Models\ProductInput;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,6 +15,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         \Schema::defaultStringLength(191);
+        ProductInput::created(function (ProductInput $input){
+            $product = $input->product;
+            $product->stock += $input->amount;
+            $product->save();
+
+            //Estudar sobre Observers e Events Eloquent pela doc do laravel
+        });
     }
 
     /**

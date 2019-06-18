@@ -17,7 +17,7 @@ class CreateProductInputsTable extends Migration
             $table->increments('id');
             $table->integer('product_id')->unsigned();
             $table->foreign('product_id')->references('id')->on('products');
-            $table->integer('amount');
+            $table->integer('amount')->unsigned();
             $table->timestamps();
         });
     }

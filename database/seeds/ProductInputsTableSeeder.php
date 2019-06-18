@@ -1,5 +1,6 @@
 <?php
 
+use ChatShopping\Models\Product;
 use ChatShopping\Models\ProductInput;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,12 @@ class ProductInputsTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(ProductInput::class, 10)->create();
+        $products = Product::all();
+        factory(ProductInput::class, 150)
+            ->make()
+            ->each(function (ProductInput $input) use ($products){
+                $input->product_id = $products->random()->id;
+                $input->save();
+            });
     }
 }
