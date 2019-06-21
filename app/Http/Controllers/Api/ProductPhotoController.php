@@ -4,12 +4,10 @@ namespace ChatShopping\Http\Controllers\Api;
 
 use ChatShopping\Http\Controllers\Controller;
 use ChatShopping\Http\Requests\ProductPhotoRequest;
-use ChatShopping\Http\Requests\ProductPhotoUpdateRequest;
 use ChatShopping\Http\Resources\ProductPhotoCollection;
 use ChatShopping\Http\Resources\ProductPhotoResource;
 use ChatShopping\Models\Product;
 use ChatShopping\Models\ProductPhoto;
-use Illuminate\Http\Request;
 
 class ProductPhotoController extends Controller
 {
@@ -26,22 +24,29 @@ class ProductPhotoController extends Controller
 
     public function show(Product $product, ProductPhoto $photo)
     {
-        if ($photo->product_id != $product->id)
-        {
-            abort(404);
-        }
+        $this->assertProductPhoto($photo, $product);
         return new ProductPhotoResource($photo);
     }
 
-    public function update(ProductPhotoUpdateRequest $request, Product $product, ProductPhoto $photo)
+    public function update(ProductPhotoRequest $request, Product $product, ProductPhoto $photo)
     {
+        $this->assertProductPhoto($photo, $product);
         $photoUpdated = ProductPhoto::updateWithPhotoFile($product->id, $photo, $request->photo);
         return new ProductPhotoResource($photoUpdated);
     }
 
     public function destroy(Product $product, ProductPhoto $photo)
     {
+        $this->assertProductPhoto($photo, $product);
         ProductPhoto::deleteWithPhotosFiles($product->id, $photo);
         return response()->json([], 204);
+    }
+
+    private function assertProductPhoto(ProductPhoto $photo, Product $product)
+    {
+        if ($photo->product_id != $product->id)
+        {
+            abort(404);
+        }
     }
 }

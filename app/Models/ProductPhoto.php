@@ -45,15 +45,42 @@ class ProductPhoto extends Model
 
     public static function updateWithPhotoFile(int $productId, ProductPhoto $photo, UploadedFile $file): ProductPhoto
     {
+        $bkpPhotoPath = self::backupPhoto($productId, $photo->file_name);
+        $oldPhotoName = $photo->file_name;
         try {
             self::uploadFiles($productId, [$file]);
-            self::deleteFile($productId, $photo->file_name);
+            \DB::beginTransaction();
+            self::deleteFile($productId, $oldPhotoName);
             $photo->file_name = $file->hashName();
             $photo->save();
+            \DB::commit();
             return $photo;
         } catch (\Exception $e) {
             self::deleteFiles($productId, [$file]);
+            self::restorePhoto($bkpPhotoPath, $productId, $oldPhotoName);
+            \DB::rollBack();
             throw $e;
+        }
+    }
+
+    private static function backupPhoto(int $productId, string $fileName) : string
+    {
+        $path = self::photosPath($productId);
+        $photoPath = "{$path}/{$fileName}";
+        $temp_file = sys_get_temp_dir() . "\{$fileName}";
+        \File::copy($photoPath, $temp_file);
+        return $temp_file;
+    }
+
+    private static function restorePhoto(string $temp_file, int $productId, string $fileName)
+    {
+        try {
+            $path = self::photosPath($productId);
+            $photoPath = "{$path}/{$fileName}";
+            \File::copy($temp_file, $photoPath);
+            \File::delete($temp_file);
+        } catch (\Exception $e){
+
         }
     }
 
