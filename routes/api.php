@@ -25,4 +25,5 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function(){
 //    Route::post('products/{product}/photos/{photo}', 'ProductPhotoController@update')->name('products.photos.update');
     Route::resource('inputs', 'ProductInputController', ['only' => ['index', 'store', 'show']]);
     Route::resource('outputs', 'ProductOutputController', ['only' => ['index', 'store', 'show']]);
+    Route::resource('users', 'UserController', ['except' => ['create', 'edit']]);
 });
