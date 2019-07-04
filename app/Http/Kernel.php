@@ -2,6 +2,7 @@
 
 namespace ChatShopping\Http;
 
+use ChatShopping\Http\Middleware\CorsMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -19,6 +20,7 @@ class Kernel extends HttpKernel
         \ChatShopping\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \ChatShopping\Http\Middleware\TrustProxies::class,
+        CorsMiddleware::class
     ];
 
     /**
