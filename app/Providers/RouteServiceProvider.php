@@ -2,8 +2,10 @@
 
 namespace ChatShopping\Providers;
 
+use ChatShopping\Common\OnlyTrashed;
 use ChatShopping\Models\Product;
 use ChatShopping\Models\Category;
+use ChatShopping\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -12,6 +14,7 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 
 class RouteServiceProvider extends ServiceProvider
 {
+    use OnlyTrashed;
     /**
      * This namespace is applied to your controller routes.
      *
@@ -32,27 +35,27 @@ class RouteServiceProvider extends ServiceProvider
 
         parent::boot();
 
-        Route::bind('category', function ($value){
+        Route::bind('category', function ($value) {
             /** @var Collection $collection */
             $collection = Category::whereId($value)->orWhere('slug', $value)->get();
             return $collection->first();
         });
 
-        Route::bind('product', function($value){
+        Route::bind('product', function ($value) {
             /** @var Collection $collection */
             $query = Product::query();
-            $query = $this->onlyTrashedIfRequested($query);
+            $request = app(Request::class);
+            $query = $this->onlyTrashedIfRequested($request, $query);
             $collection = $query->whereId($value)->orWhere('slug', $value)->get();
             return $collection->first();
         });
-    }
 
-    private function onlyTrashedIfRequested(Builder $query)
-    {
-        if (\Request::get('trashed') == 1){
-            $query = $query->onlyTrashed();
-        }
-        return $query;
+        Route::bind('user', function ($value) {
+            $query = User::query();
+            $request = app(Request::class);
+            $query = $this->onlyTrashedIfRequested($request, $query);
+            return $query->find($value);
+        });
     }
 
     /**
@@ -79,8 +82,8 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapWebRoutes()
     {
         Route::middleware('web')
-             ->namespace($this->namespace)
-             ->group(base_path('routes/web.php'));
+            ->namespace($this->namespace)
+            ->group(base_path('routes/web.php'));
     }
 
     /**
@@ -93,8 +96,8 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapApiRoutes()
     {
         Route::prefix('api')
-             ->middleware('api')
-             ->namespace($this->namespace)
-             ->group(base_path('routes/api.php'));
+            ->middleware('api')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/api.php'));
     }
 }

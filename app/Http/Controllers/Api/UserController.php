@@ -2,24 +2,30 @@
 
 namespace ChatShopping\Http\Controllers\Api;
 
+use ChatShopping\Common\OnlyTrashed;
+use ChatShopping\Events\UserCreatedEvent;
 use ChatShopping\Http\Requests\UserRequest;
 use ChatShopping\Http\Resources\UserResource;
 use ChatShopping\Models\User;
 use ChatShopping\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index()
+    use OnlyTrashed;
+
+    public function index(Request $request)
     {
-        return UserResource::collection(User::all());
+        $query = User::query();
+        $query = $this->onlyTrashedIfRequested($request, $query);
+        $users = $query->paginate(10);
+        return UserResource::collection($users);
     }
 
     public function store(UserRequest $request)
     {
         $user = User::create($request->all());
-        $user->password = bcrypt($user->password);
-        $user->save();
+        event(new UserCreatedEvent($user));
         return new UserResource($user);
     }
 
@@ -31,7 +37,6 @@ class UserController extends Controller
     public function update(UserRequest $request, User $user)
     {
         $user->fill($request->all());
-        $user->password = bcrypt($user->password);
         $user->save();
         return new UserResource($user);
     }

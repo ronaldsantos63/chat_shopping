@@ -16,6 +16,9 @@ class EventServiceProvider extends ServiceProvider
         'ChatShopping\Events\Event' => [
             'ChatShopping\Listeners\EventListener',
         ],
+        'ChatShopping\Events\UserCreatedEvent' => [
+            'ChatShopping\Listeners\SendEmailDefinePassword'
+        ],
     ];
 
     /**

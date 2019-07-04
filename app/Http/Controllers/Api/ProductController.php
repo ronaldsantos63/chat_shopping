@@ -6,16 +6,13 @@ use ChatShopping\Http\Controllers\Controller;
 use ChatShopping\Http\Requests\ProductRequest;
 use ChatShopping\Http\Resources\ProductResource;
 use ChatShopping\Models\Product;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
+
+    public function index()
     {
-        $query = Product::query();
-        $query = $this->onlyTrashedIfRequested($request, $query);
-        return ProductResource::collection($query->paginate(25));
+        return ProductResource::collection(Product::paginate(25));
     }
 
     public function store(ProductRequest $request)
@@ -43,11 +40,9 @@ class ProductController extends Controller
         return response([], 204);
     }
 
-    private function onlyTrashedIfRequested(Request $request, Builder $query)
+    public function restore(Product $product)
     {
-        if ($request->get('trashed') == 1){
-            $query = $query->onlyTrashed();
-        }
-        return $query;
+        $product->restore();
+        return response()->json([], 204);
     }
 }

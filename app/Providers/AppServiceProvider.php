@@ -4,8 +4,6 @@ namespace ChatShopping\Providers;
 
 use ChatShopping\Models\ProductInput;
 use ChatShopping\Models\ProductOutput;
-use ChatShopping\Models\ProductPhoto;
-use ChatShopping\Models\User;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
